@@ -61,10 +61,10 @@ end
 %% 2 - Check scene cut
 scLabel = zeros(size(fDiff,1),1);
 scFlag = 0;
-idx = lookbackLen+1;
+idx = lookbackLen+offset+1;
 while idx <= length(scLabel),
     if ~scFlag,
-        avghDiff = mean(histDiff(idx-lookbackLen:idx-1));
+        avghDiff = mean(histDiff(idx-lookbackLen-offset:idx-1-offset));
         if histDiff(idx)>=diffRatio*avghDiff,
             scPts = find(scLabel==1);
             if ~isempty(scPts),
