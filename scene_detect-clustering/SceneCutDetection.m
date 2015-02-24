@@ -42,8 +42,10 @@ halfROIw = round(ROIspatial(4)/2);
 for idx = ROItemporal(1)+1:ROItemporal(2),
     colorFrm = read(VidObj,idx-1);
     prevFrm = double(colorFrm(:,:,2));
+    prevFrmGray = double(rgb2gray(colorFrm));
     colorFrm = read(VidObj,idx);
     currFrm = double(colorFrm(:,:,2));
+    currFrmGray = double(rgb2gray(colorFrm));
 %     prevFrm = double(rgb2gray(read(VidObj,idx-1)));
 %     currFrm = double(rgb2gray(read(VidObj,idx)));
     % Only consider the spatial ROI
@@ -52,8 +54,8 @@ for idx = ROItemporal(1)+1:ROItemporal(2),
     % 1-step F-diff for four quadrants
     fDiff(idx-ROItemporal(1)) = mean((currFrm(:) - prevFrm(:)).^2);
     % Histogram difference
-    prevHist = hist(prevFrm(:),64);
-    currHist = hist(currFrm(:),64);
+    prevHist = hist(prevFrmGray(:),64);
+    currHist = hist(currFrmGray(:),64);
     histDiff(idx-ROItemporal(1)) = sum(abs(currHist-prevHist));
     disp(['Processed ' num2str(idx-ROItemporal(1)) ' frame']);
 end
@@ -65,7 +67,9 @@ idx = lookbackLen+offset+1;
 while idx <= length(scLabel),
     if ~scFlag,
         avghDiff = mean(histDiff(idx-lookbackLen-offset:idx-1-offset));
-        if histDiff(idx)>=diffRatio*avghDiff,
+        % Condition 1 - test histogram difference
+        hRatio = histDiff(idx)/avghDiff;
+        if hRatio>=diffRatio || hRatio<=1/diffRatio,
             scPts = find(scLabel==1);
             if ~isempty(scPts),
                 LastscPt = scPts(end);
@@ -73,7 +77,15 @@ while idx <= length(scLabel),
                 LastscPt = idx;
             end
             avgfDiff = fDiff(LastscPt+offset);
-            if fDiff(idx)>=diffRatioDiff*avgfDiff,
+            fRatio = fDiff(idx)/avgfDiff;
+            if fRatio>=diffRatioDiff || fRatio<=1/diffRatioDiff,
+                scFlag = 1;
+                scLabel(idx) = 1;
+            end
+        end
+        % Condition 2 - test direct histogram difference spike
+        if ~scFlag,
+            if histDiff(idx)>=2*diffRatio*histDiff(idx-1),
                 scFlag = 1;
                 scLabel(idx) = 1;
             end
