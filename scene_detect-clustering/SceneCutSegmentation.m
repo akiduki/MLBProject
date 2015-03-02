@@ -43,7 +43,7 @@ for idx=1:numSeg,
     if size(currSegGray,3)>=temporalCut,
         allIdx = randperm(size(currSegGray,3));
         keepIdx = sort(allIdx(1:temporalCut),'ascend');
-        readySegGray(:,:,:,idx) = currSegGray(:,:,keepIdx);
+        readySegGray(:,:,keepIdx,idx) = currSegGray(:,:,keepIdx);
     else
         keepIdx = [];
         readySegGray = [];
