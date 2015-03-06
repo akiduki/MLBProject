@@ -14,6 +14,7 @@
 
 clear all
 %% Pre-ambles - Video read-in and frame difference calculation
+load('scPos.mat');
 VidPath = '../videos/mlbpb_23570674_600K.mp4';
 VidObj = VideoReader(VidPath); % source video object
 
@@ -33,15 +34,16 @@ NumRowBlk = floor((ROIspatial(4)-ROIspatial(3)+1)/bSize);
 segIdx = [scPos(1:end-1)+trimN scPos(2:end)-trimN]; % trim a bit
 
 % loop over all segments
-for seg = 1:size(segIdx,1),
+for seg = 3:size(segIdx,1),
     currSegIdx = segIdx(seg,:);
     currSegLen = currSegIdx(2)-currSegIdx(1)+1;
     MVfield = cell(currSegLen-1,1);
-    for frmIdx = 2:currSegLen,
-        colorFrm = read(VidObj,frmIdx-1);
+    t = tic;
+    for frmIdx = 1:currSegLen-1,
+        colorFrm = read(VidObj,currSegIdx(1)+frmIdx);
         prevFrm = single(colorFrm(:,:,2));
         prevFrmGray = double(rgb2gray(colorFrm)); % reference frame
-        colorFrm = read(VidObj,frmIdx);
+        colorFrm = read(VidObj,currSegIdx(1)+frmIdx-1);
         currFrm = single(colorFrm(:,:,2));
         currFrmGray = double(rgb2gray(colorFrm)); % current frame
         % Only consider the spatial ROI
@@ -49,15 +51,17 @@ for seg = 1:size(segIdx,1),
         currFrm = currFrm(ROIspatial(1):ROIspatial(2),ROIspatial(3):ROIspatial(4));
         % Now do the EBMA
         pos = 1;
-        for i=1:bSize:h-bSize+1,
-            for j=1:bSize:w-bSize+1,
+        nMV = [0 0; 0 0];
+        [mheight mwidth] = size(currFrm);
+        for i=1:bSize:mheight-bSize+1,
+            for j=1:bSize:mwidth-bSize+1,
                 currBlk = currFrm(i:i+bSize-1,j:j+bSize-1);
+                currFlat = currBlk(:);
                 [pCan,pCanMVlist]= InterCandidates(prevFrm,MErange,bSize,i,j);
-                [pBlk,eBlk,currFrmMV(pos,:),pErr] = MotionSearchTV(currFlat,allCan,lambda,nMV,pCanMVlist);
+                [junk,junk,currFrmMV(pos,:),junk] = MotionSearchTV(currFlat,pCan,lambda,nMV,pCanMVlist);
+                pos = pos + 1;
                 % Update the neighboring MVs for the next block
-                if pos == 1,
-                    nMV = [0 0; 0 0];
-                elseif pos <= NumRowBlk,
+                if pos <= NumRowBlk,
                     nMV = [currFrmMV(pos-1,:)
                         currFrmMV(pos-1,:)];
                 elseif mod(pos,NumRowBlk)==1,
@@ -67,11 +71,13 @@ for seg = 1:size(segIdx,1),
                     nMV = [currFrmMV(pos-1,:)
                         currFrmMV(pos-NumRowBlk,:)];
                 end
-                pos = pos + 1;
             end
         end
         % Save current frame MV field
-        MVfield{frmIdx-1} = currFrmMV;
+        MVfield{frmIdx} = currFrmMV;
+        disp(['Processed segment ' num2str(frmIdx)]);
     end
+    tSeg = toc(t);
+    disp(['Processed segment ' num2str(seg) ', time = ' num2str(tSeg)]);
     save(['SegNum=' num2str(seg) '_MVfield.mat'], 'MVfield');
 end

@@ -1,18 +1,19 @@
 clear all
 
-strPt = 65810; %12275;%12042;
-endPt = 65880;%12120;
+strPt = 28157; %12275;%12042;
+endPt = 28257; %12120;
 GOPsize = endPt - strPt + 1;
 
 width = 400;
 height = 224;
 % Call RPCA to solve!~
-lambda = 0.05; % regularization term on L1-norm
+% lambda = 0.1; % regularization term on L1-norm
+lambda = 0.05;
 tol = 1e-5;
 iterNum = 1000;
-rank = 1;
+rank = 2;
 
-VidSrc = '../video_src/mlbpb_23570674_600K.mp4';
+VidSrc = '../videos/mlbpb_23570674_600K.mp4';
 VidObj = VideoReader(VidSrc);
 
 SegFrm = double(read(VidObj,[strPt endPt]));

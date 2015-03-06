@@ -5,3 +5,6 @@ video_src/mlbpb_23570674_600K.mp4.lwi
 scene_detect-clustering/dataspace.mat
 *.asv
 scene_detect-clustering/MotionSearch.m
+videos/mlbpb_23570674_600K.mp4.lwi
+learning_transform/demo.avi
+*.avi

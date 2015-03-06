@@ -45,22 +45,12 @@ for idx=1:numSeg,
         currSegGray(:,:,allIdx(temporalCut+1:end)) = [];
         readySegGray(:,:,:,idx) = currSegGray;
     else
-        keepIdx = [];
-        frmidx = 1;
-        for i=1:(temporalCut-size(currSegGray,3)),
-            rng('shuffle');
-            tmp = randperm(size(currSegGray,3));
-            keepIdx = [keepIdx tmp(1)];
-        end
-        % keepIdx stores all repeat frame locations
-        for i=1:size(currSegGray,3),          
-            readySegGray(:,:,frmidx,idx) = currSegGray(:,:,i);
-            frmidx = frmidx + 1;
-            if ismember(i,keepIdx),
-                readySegGray(:,:,frmidx,idx) = readySegGray(:,:,frmidx-1,idx);                
-                frmidx = frmidx + 1;
-            end
-        end
+        keepIdx = 1:size(currSegGray,3);
+        randIdx = randi(size(currSegGray,3),1,temporalCut-size(currSegGray,3));
+        keepIdx = [keepIdx randIdx];
+        % sort
+        keepIdx = sort(keepIdx,'ascend');
+        readySegGray(:,:,:,idx) = currSegGray(:,:,keepIdx);
     end
 end
 tensorSegGray = tensor(readySegGray);

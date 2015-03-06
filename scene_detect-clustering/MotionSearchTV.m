@@ -1,4 +1,4 @@
-function [pBlk,eBlk,pos,minSSE] = MotionSearchTV(currBlk,canBlk,lambda,nMV,pCanMVlist)
+function [pBlk,eBlk,posMV,minSSE] = MotionSearchTV(currBlk,canBlk,lambda,nMV,pCanMVlist)
 % The exhaustive motion search function, TV regulated
 % This function calcuates and compares the sum of sqaured errors between
 % each candidate and the current block. The function will then return the
@@ -21,12 +21,15 @@ inflatBlk = repmat(currBlk,1,size(canBlk,2));
 % calculate the MSE cost
 allMSE = mean((inflatBlk-canBlk).^2,1); % summing along the column
 % calculate the corresponding TVs
-TV = sqrt((pCanMVlist - nMV(1,:)).^2 + (pCanMVlist - nMV(2,:)).^2);
+TV = sqrt((pCanMVlist - repmat(nMV(1,:),size(pCanMVlist,1),1)).^2 +...
+    (pCanMVlist - repmat(nMV(2,:),size(pCanMVlist,1),1)).^2);
+TV = sum(TV,2);
 % find the lowest cost
-[minSSE,pos] = min(allMSE+nlambda.*TV);
+[minSSE,pos] = min(allMSE(:)+nlambda.*TV(:));
 tCoef = canBlk(:,pos);
 % reshape it back to blkSize*blkSize
 pBlk = reshape(tCoef,bSize,bSize);
 cBlk = reshape(currBlk,bSize,bSize);
 % calculate the error block
 eBlk = cBlk - pBlk;
+posMV = pCanMVlist(pos,:);
