@@ -2,3 +2,4 @@
 video_src/mlbpb_23570674_600K.mp4.lwi
 *.avs
 *.db
+scene_detect-clustering/dataspace.mat

@@ -17,7 +17,7 @@ height = VidObj.Height;
 width = VidObj.Width;
 ROIspatial = [1 height-66 1 width];
 ROItemporal = [4130 88777];
-temporalCut = 200; % fixed 200 frames
+temporalCut = 150; % fixed 1500 frames
 trimN = 3;
 
 % Get the segments
@@ -26,10 +26,10 @@ randIdx = randperm(length(scPos)-1);
 segIdx = [scPos(randIdx(1:numSeg))+trimN scPos(randIdx(1:numSeg)+1)-trimN]; % trim a bit
 
 % 4-D tensor for storing all data
-readySegGray = tenzeros(round(ROIspatial(2)/2),round(ROIspatial(4)/2),temporalCut,numSeg);
+readySegGray = zeros(round(ROIspatial(2)/2),round(ROIspatial(4)/2),temporalCut,numSeg);
 % Query the video and store the data
 for idx=1:numSeg,
-    currSeg = double(read(VidObj,segIdx(idx,:)));
+    currSeg = single(read(VidObj,segIdx(idx,:)));
     currSegGray = squeeze(0.2989*currSeg(:,:,1,:) ...
         + 0.5870*currSeg(:,:,2,:) + 0.1140*currSeg(:,:,3,:));
     % Only consider the ROI region
@@ -39,14 +39,13 @@ for idx=1:numSeg,
     for i = 1:size(currSegGray,3),
         currSegGray(:,:,i) = currSegGray(:,:,i)-mean2(squeeze(currSegGray(:,:,i)));
     end
-    % Temporally resize to 200 frames
+    % Temporally resize to 150 frames
     if size(currSegGray,3)>=temporalCut,
         allIdx = randperm(size(currSegGray,3));
-        keepIdx = sort(allIdx(1:temporalCut),'ascend');
-        readySegGray(:,:,keepIdx,idx) = currSegGray(:,:,keepIdx);
+        currSegGray(:,:,allIdx(temporalCut+1:end)) = [];
+        readySegGray(:,:,:,idx) = currSegGray;
     else
         keepIdx = [];
-        readySegGray = [];
         frmidx = 1;
         for i=1:(temporalCut-size(currSegGray,3)),
             rng('shuffle');
@@ -58,12 +57,18 @@ for idx=1:numSeg,
             readySegGray(:,:,frmidx,idx) = currSegGray(:,:,i);
             frmidx = frmidx + 1;
             if ismember(i,keepIdx),
-                readySegGray(:,:,frmidx,idx) = readySegGray(:,:,frmidx-1);                
+                readySegGray(:,:,frmidx,idx) = readySegGray(:,:,frmidx-1,idx);                
                 frmidx = frmidx + 1;
             end
         end
     end
 end
-
+tensorSegGray = tensor(readySegGray);
 % Do Tucker decomposition for the tensor
-T = tucker_als(readySegGray,[15 15 15 10]);
+sprank1 = 20;
+sprank2 = 80;
+trank = 15;
+srank = 15;
+T = tucker_als(tensorSegGray,[sprank1 sprank2 trank srank]);
+
+T2 = tucker_als(tensorSegGray,[8 32 15 10]);
