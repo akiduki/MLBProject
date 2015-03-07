@@ -75,7 +75,7 @@ for seg = 3:size(segIdx,1),
         end
         % Save current frame MV field
         MVfield{frmIdx} = currFrmMV;
-        disp(['Processed segment ' num2str(frmIdx)]);
+        disp(['Processed frame ' num2str(frmIdx)]);
     end
     tSeg = toc(t);
     disp(['Processed segment ' num2str(seg) ', time = ' num2str(tSeg)]);
