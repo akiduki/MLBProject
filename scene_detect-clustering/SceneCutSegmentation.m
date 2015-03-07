@@ -21,9 +21,13 @@ temporalCut = 150; % fixed 1500 frames
 trimN = 3;
 
 % Get the segments
+AllsegIdx = [scPos(1:length(scPos)-1)+trimN scPos(2:length(scPos))-trimN];
+AllsegLen = AllsegIdx(:,2) - AllsegIdx(:,1) + 1;
+AllsegIdx = AllsegIdx(find(AllsegLen>50),:);
+AllsegLen = AllsegLen(find(AllsegLen>50));
 numSeg = 150; % number of segments
-randIdx = randperm(length(scPos)-1);
-segIdx = [scPos(randIdx(1:numSeg))+trimN scPos(randIdx(1:numSeg)+1)-trimN]; % trim a bit
+randpermIdx = randperm(length(AllsegLen));
+segIdx = AllsegIdx(randpermIdx(1:numSeg),:);
 
 % 4-D tensor for storing all data
 readySegGray = zeros(round(ROIspatial(2)/2),round(ROIspatial(4)/2),temporalCut,numSeg);
