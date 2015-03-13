@@ -11,7 +11,7 @@ height = VidObj.Height;
 width = VidObj.Width;
 ROIspatial = [1 height-66 1 width];
 ROItemporal = [4130 88777];
-temporalCut = 150; % fixed 1500 frames
+temporalCut = 150; % fixed 150 frames
 trimN = 3;
 
 % Get the segments
@@ -59,3 +59,72 @@ projFlag = 0;
 affFlag = 0;
 outlierFlag = 0;
 [dataCtr,CMat] = SSC(allFeat,projFlag,affFlag,mu,outlierFlag,rho,numClusters);
+
+%% Visualization
+load tucker_tensor.mat
+temporalCut = 150;
+numRowSubImg = 5;
+numColSubImg = 12;
+stitchImg = zeros((size(T2.U{1},2)+3)*numColSubImg,(size(T2.U{2},2)+3)*numRowSubImg,temporalCut);
+subImgH = size(T2.U{1},2);
+subImgW = size(T2.U{2},2);
+rowIdx = 0;
+for i=5,
+    clusterIdx = find(dataCtr==i);
+    for j = 1:length(clusterIdx),
+        currCore = reshape(allFeat(:,clusterIdx(j)),size(T2.U{1},2),size(T2.U{2},2),size(T2.U{3},2));
+        currInput = ttm(tensor(currCore),{T2.U{3}},3);
+        currData = [currInput.data -1000*ones(subImgH,3,temporalCut)
+            -1000*ones(3,subImgW,temporalCut) -1000*ones(3,3,temporalCut)];
+        if mod(j,numRowSubImg)==1,
+            rowIdx = rowIdx + 1;
+            colIdx = 1;
+        else
+            colIdx = colIdx + 1;
+        end
+        rowRange = 1+(rowIdx-1)*subImgH:rowIdx*subImgH+3;
+        colRange = 1+(colIdx-1)*subImgW:colIdx*subImgW+3;
+        stitchImg(rowRange,colRange,:) = currData;
+    end
+end
+
+for i=1:temporalCut,
+    imshow(imresize(stitchImg(:,:,i),4),[]);
+    pause(.1);
+end
+%% Direct build adjacency map from Euclidean distance
+for i=1:size(allFeat,2),
+    for j=1:size(allFeat,2),
+        distMat(i,j) = norm(allFeat(i,:)-allFeat(j,:));
+    end
+end
+%%
+VidPath = '..\videos\mlbpb_23570674_600K.mp4';
+VidObj = VideoReader(VidPath); % source video object
+temporalCut = 150;
+subImgH = 112*2;
+subImgW = 200*2;
+rowIdx = 0;
+for i=2,
+    clusterIdx = find(dataCtr==i);
+    totImg = length(clusterIdx);
+    numRowSubImg = 5;
+    numColSubImg = ceil(totImg/numRowSubImg);
+    stitchImg = zeros((subImgH+10)*numColSubImg,(subImgW+10)*numRowSubImg,3);
+    for j = 1:length(clusterIdx),
+        currSeg = read(VidObj,segIdx(clusterIdx(j),:));
+        currInput = double(squeeze(currSeg(:,:,:,5)));
+%         currInput = imresize(currInput,0.5,'nearest');
+        currData = [currInput 255*ones(subImgH,10,3)
+            255*ones(10,subImgW,3) 255*ones(10,10,3)];
+        if mod(j,numRowSubImg)==1,
+            rowIdx = rowIdx + 1;
+            colIdx = 1;
+        else
+            colIdx = colIdx + 1;
+        end
+        rowRange = 1+(rowIdx-1)*(subImgH+10):rowIdx*(subImgH+10);
+        colRange = 1+(colIdx-1)*(subImgW+10):colIdx*(subImgW+10);
+        stitchImg(rowRange,colRange,:) = currData;
+    end
+end
