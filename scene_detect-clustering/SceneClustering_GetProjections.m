@@ -58,54 +58,22 @@ mu = 20; % ADMM parameter
 projFlag = 0;
 affFlag = 0;
 outlierFlag = 0;
-[dataCtr,CMat] = SSC(allFeat,projFlag,affFlag,mu,outlierFlag,rho,numClusters);
+[dataCtr,CMat,eigvals] = SSC(allFeat,projFlag,affFlag,mu,outlierFlag,rho,numClusters);
 
-%% Visualization
-load tucker_tensor.mat
-temporalCut = 150;
-numRowSubImg = 5;
-numColSubImg = 12;
-stitchImg = zeros((size(T2.U{1},2)+3)*numColSubImg,(size(T2.U{2},2)+3)*numRowSubImg,temporalCut);
-subImgH = size(T2.U{1},2);
-subImgW = size(T2.U{2},2);
-rowIdx = 0;
-for i=5,
-    clusterIdx = find(dataCtr==i);
-    for j = 1:length(clusterIdx),
-        currCore = reshape(allFeat(:,clusterIdx(j)),size(T2.U{1},2),size(T2.U{2},2),size(T2.U{3},2));
-        currInput = ttm(tensor(currCore),{T2.U{3}},3);
-        currData = [currInput.data -1000*ones(subImgH,3,temporalCut)
-            -1000*ones(3,subImgW,temporalCut) -1000*ones(3,3,temporalCut)];
-        if mod(j,numRowSubImg)==1,
-            rowIdx = rowIdx + 1;
-            colIdx = 1;
-        else
-            colIdx = colIdx + 1;
-        end
-        rowRange = 1+(rowIdx-1)*subImgH:rowIdx*subImgH+3;
-        colRange = 1+(colIdx-1)*subImgW:colIdx*subImgW+3;
-        stitchImg(rowRange,colRange,:) = currData;
-    end
-end
-
-for i=1:temporalCut,
-    imshow(imresize(stitchImg(:,:,i),4),[]);
-    pause(.1);
-end
 %% Direct build adjacency map from Euclidean distance
 for i=1:size(allFeat,2),
     for j=1:size(allFeat,2),
         distMat(i,j) = norm(allFeat(i,:)-allFeat(j,:));
     end
 end
-%%
+%% Visualization
 VidPath = '..\videos\mlbpb_23570674_600K.mp4';
 VidObj = VideoReader(VidPath); % source video object
 temporalCut = 150;
 subImgH = 112*2;
 subImgW = 200*2;
 rowIdx = 0;
-for i=2,
+for i=6,
     clusterIdx = find(dataCtr==i);
     totImg = length(clusterIdx);
     numRowSubImg = 5;
