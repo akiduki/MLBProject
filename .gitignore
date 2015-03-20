@@ -11,3 +11,4 @@ learning_transform/demo.avi
 scene_detect-clustering/cluster6VidIdx.mat
 scene_detect-clustering/tmp.m
 scene_detect-clustering/tempMAT.mat
+*.y4m
