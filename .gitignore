@@ -8,3 +8,8 @@ scene_detect-clustering/MotionSearch.m
 videos/mlbpb_23570674_600K.mp4.lwi
 learning_transform/demo.avi
 *.avi
+scene_detect-clustering/cluster6VidIdx.mat
+scene_detect-clustering/tmp.m
+scene_detect-clustering/tempMAT.mat
+*.y4m
+*.png
