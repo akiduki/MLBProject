@@ -72,8 +72,8 @@ VidObj = VideoReader(VidPath); % source video object
 temporalCut = 150;
 subImgH = 112*2;
 subImgW = 200*2;
-rowIdx = 0;
-for i=6,
+for i=1:10,
+    rowIdx = 0;
     clusterIdx = find(dataCtr==i);
     totImg = length(clusterIdx);
     numRowSubImg = 5;
@@ -81,7 +81,7 @@ for i=6,
     stitchImg = zeros((subImgH+10)*numColSubImg,(subImgW+10)*numRowSubImg,3);
     for j = 1:length(clusterIdx),
         currSeg = read(VidObj,segIdx(clusterIdx(j),:));
-        currInput = double(squeeze(currSeg(:,:,:,5)));
+        currInput = double(squeeze(currSeg(:,:,:,20)));
 %         currInput = imresize(currInput,0.5,'nearest');
         currData = [currInput 255*ones(subImgH,10,3)
             255*ones(10,subImgW,3) 255*ones(10,10,3)];
@@ -95,4 +95,12 @@ for i=6,
         colRange = 1+(colIdx-1)*(subImgW+10):colIdx*(subImgW+10);
         stitchImg(rowRange,colRange,:) = currData;
     end
+    allImg{i} = stitchImg(:,:,1);
+    disp(['Processed ' num2str(i)]);
+end
+
+for i=1:10,
+    figure(i);
+    imshow(allImg{i},[0 255]);
+    title(['Cluste = ' num2str(i)]);
 end
