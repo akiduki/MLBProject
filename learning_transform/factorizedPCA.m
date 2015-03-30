@@ -1,14 +1,16 @@
 clear all
-
-strPt = 28157; %12275;%12042;
-endPt = 28257; %12120;
+load '../scene_detect-clustering/cluster5VidIdx.mat'
+addpath('./inexact_alm_rpca/');
+segId = 48;
+strPt = cluster5Idx(segId,1);
+endPt = cluster5Idx(segId,2);
 GOPsize = endPt - strPt + 1;
 
 width = 400;
 height = 224;
 % Call RPCA to solve!~
 % lambda = 0.1; % regularization term on L1-norm
-lambda = 0.005;
+lambda = 0.01;
 tol = 1e-5;
 iterNum = 100;
 rank = 2;
@@ -25,3 +27,9 @@ end
 % Run factorized RPCA
 % [Lhat Rhat Shat] = almLRPCA(X,tol,width*height*0.25,GOPsize,iterNum,rank,[],lambda);
 [Ahat Ehat iter] = inexact_alm_rpca(X,lambda,tol,iterNum);
+
+for i=1:GOPsize,
+    currFrm = reshape(Ahat(:,i),height,width);
+    imshow(currFrm,[]);
+    pause(.1);
+end
