@@ -5,14 +5,14 @@
 clear all;
 posi = './positive/';
 nega = './negative/';
-setSize = 100;
+setSize = 51;
 SVMopts = '-t 0 -c 10';
 posMat = [];
 negMat = [];
 
 AllLabel = zeros(setSize*2,1);
-RedIdx = [5 11:35 65:73 90:100];
-BlueIdx = setdiff(1:100,RedIdx);
+% RedIdx = [5 11:35 65:73 90:100];
+% BlueIdx = setdiff(1:100,RedIdx);
 
 for i=1:setSize,
     currPosName = [posi 'positive_' num2str(i) '.png'];
@@ -26,8 +26,8 @@ for i=1:setSize,
     negMat = [negMat; transpose(currNeg(:))];
 end
 AllFeatMat = [double(posMat); double(negMat)];
-AllLabel(RedIdx) = 1;
-AllLabel(BlueIdx) = 2;
+AllLabel(1:51) = 1;
+% AllLabel(BlueIdx) = 2;
 
 % Train SVM
 model = svmtrain(AllLabel, AllFeatMat, SVMopts);
@@ -63,6 +63,7 @@ VidPath = '..\videos\mlbpb_23570674_600K.mp4';
 VidObj = VideoReader(VidPath); % source video object
 
 % 74 156 -74 -24
+% 94 14 -182 -190
 
 % Video stats
 numFrm = VidObj.NumberOfFrames;
@@ -73,7 +74,8 @@ dec = zeros(numFrm,1);
 
 for idx=1:numFrm,
     currFrm = read(VidObj,idx);
-    currFrm = currFrm(157:end-24,75:end-74,:);
+%     currFrm = currFrm(157:end-24,75:end-74,:);
+    currFrm = currFrm(15:end-190,95:end-182,:);
     currFrm = rgb2gray(imresize(currFrm, 0.5, 'nearest'));
     % call SVM model
     predicted_label(idx) = svmpredict(0,transpose(double(currFrm(:))),model);
