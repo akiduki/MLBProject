@@ -40,8 +40,9 @@ halfROIw = round(ROIspatial(4)/2);
 
 %% 1 - Calculating the frame difference
 % matlabpool open
+Delay = 30;
 for idx = ROItemporal(1)+1:ROItemporal(2),
-    colorFrm = read(VidObj,idx-1);
+    colorFrm = read(VidObj,idx-Delay);
     prevFrm = double(colorFrm(:,:,2));
     prevFrmGray = double(rgb2gray(colorFrm));
     colorFrm = read(VidObj,idx);
@@ -58,7 +59,7 @@ for idx = ROItemporal(1)+1:ROItemporal(2),
     currFrmRes = imresize(currFrm,0.5,'nearest');
     prevFrmRes = imresize(prevFrm,0.5,'nearest');
     Cross = (currFrmRes-mean2(currFrmRes)).*(prevFrmRes-mean2(prevFrmRes));
-    fCross(idx-ROItemporal(1)) = sum(Cross(:));
+    fCrossDelayed(idx-ROItemporal(1)) = sum(Cross(:));
     disp(['Processed ' num2str(idx-ROItemporal(1)) ' frame']);
 end
 % matlabpool close
@@ -66,9 +67,6 @@ end
 scLabel = zeros(size(fDiff,1),1);
 scFlag = 0;
 idx = lookbackLen+offset+1;
-while idx <= length(scLabel),
-end
-
 %% 3 - Output the scene cut segments
 scPos = find(scLabel==1);
 scPos = scPos + ROItemporal(1) - 2;
