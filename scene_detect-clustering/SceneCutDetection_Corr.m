@@ -29,7 +29,7 @@ width = VidObj.Width;
 
 % Tunnable parameters
 lookbackLen = 5;
-offset = 3;
+offset = 10;
 diffRatio = 10;
 diffRatioDiff = 10;
 ROIspatial = [1 height-66 1 width];
@@ -64,9 +64,36 @@ for idx = ROItemporal(1)+1:ROItemporal(2),
 end
 % matlabpool close
 %% 2 - Check scene cut
+load frameCrossVal.mat
+load frameCrossValDelayed.mat
+fCrossDiff = fCross(2:end) - fCross(1:end-1);
+fDiffDiff = abs(fDiff(2:end) - fDiff(1:end-1));
+fCrossDiffThr = -7*1e6;
+fCrossDiffThr2 = -2.5*1e6;
+fDiffDiffThr = 500;
 scLabel = zeros(size(fDiff,1),1);
 scFlag = 0;
 idx = lookbackLen+offset+1;
+while idx <= length(scLabel),
+    if ~scFlag,
+%         fCrossDiffThr = mean(fCrossDiff(idx-15:idx-1));
+%         fDiffDiffThr = mean(fDiffDiff(idx-15:idx-1));
+        if fCrossDiff(idx) <= fCrossDiffThr,
+            scFlag = 1;
+            scLabel(idx) = 1;
+        elseif fCrossDiff(idx) <= fCrossDiffThr2 && ...
+                fDiffDiff(idx) >= fDiffDiffThr,
+            scFlag = 1;
+            scLabel(idx) = 1;
+        end
+        idx = idx + 1;
+    else
+        % For every newly detected scene cut, assume the next scene cut is
+        % at least $lookbacklen away.
+        idx = idx + lookbackLen + offset;
+        scFlag = 0;
+    end 
+end
 %% 3 - Output the scene cut segments
 scPos = find(scLabel==1);
 scPos = scPos + ROItemporal(1) - 2;
