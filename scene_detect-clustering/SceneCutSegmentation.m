@@ -6,7 +6,7 @@
 % clustering the scene. It requires the Sandia Tensor Toolbox and scPos.mat
 
 clear all
-load scPos.mat;
+load scPos_Corr.mat;
 
 VidPath = '..\videos\mlbpb_23570674_600K.mp4';
 VidObj = VideoReader(VidPath); % source video object

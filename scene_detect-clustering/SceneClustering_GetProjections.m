@@ -1,6 +1,6 @@
 clear all
-load scPos.mat;
-load tucker_tensor.mat;
+load scPos_Corr.mat;
+load tucker_tensor_Corr.mat;
 
 VidPath = '..\videos\mlbpb_23570674_600K.mp4';
 VidObj = VideoReader(VidPath); % source video object
@@ -58,14 +58,14 @@ mu = 20; % ADMM parameter
 projFlag = 0;
 affFlag = 0;
 outlierFlag = 0;
-[dataCtr,CMat,eigvals] = SSC(allFeat,projFlag,affFlag,mu,outlierFlag,rho,numClusters);
+[dataCtr,CMat] = SSC(allFeat,projFlag,affFlag,mu,outlierFlag,rho,numClusters);
 
-%% Direct build adjacency map from Euclidean distance
-for i=1:size(allFeat,2),
-    for j=1:size(allFeat,2),
-        distMat(i,j) = norm(allFeat(i,:)-allFeat(j,:));
-    end
-end
+% %% Direct build adjacency map from Euclidean distance
+% for i=1:size(allFeat,2),
+%     for j=1:size(allFeat,2),
+%         distMat(i,j) = norm(allFeat(i,:)-allFeat(j,:));
+%     end
+% end
 %% Visualization
 VidPath = '..\videos\mlbpb_23570674_600K.mp4';
 VidObj = VideoReader(VidPath); % source video object
