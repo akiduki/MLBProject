@@ -120,4 +120,43 @@ I have the first 2 versions installed. (I deleted the conda version. But not sur
 - have no idea what I have just jabbered, still stuck somewhere nowhere? **Well...good luck! Or should I say, _google_ with luck~! :D**
 
 *** 
+### About opencv "segmentation fault 11"
+
+Conda uninstall opencv doesn't delete cv files in the package folder. You need to delete the files manually if you want to link conda python with other CV (eg. Homebrewed OpenCV).
+
+If there are still problems about segmentation fault. Try change the first line in **cv2.so** file.
+
+
+
+
+##### About linking python to the homebrew version CV
+
+useful links: https://gist.github.com/welch/6468594 
+ 
+
+ ** firstly delted all 3 cv files in the site-packages folder:
+  sudo rm cv.pyc
+  sudo rm cv2.so
+  sudo rm cv.py **
+  
+  ```
+  And link:
+ cd /Users/Chenge/anaconda/lib/python2.7/site-packages/ln -s /usr/local/Cellar/opencv/2.4.10.1/lib/python2.7/site-packages/cv.py cv.pyln -s /usr/local/Cellar/opencv/2.4.10.1/lib/python2.7/site-packages/cv2.so cv2.so
+```
+
+after linking the 2 files, the pyc file doesn't appear 
+
+**change the first line!!**
+
+```  
+sudo install_name_tool -change libpython2.7.dylib(the first line) /Users/Chenge/anaconda/lib/libpython2.7.dylib /Users/Chenge/anaconda/lib/python2.7/site-packages/cv2.so
+```
+
+changed! still no pyc file, but
+after run python>> pyc appears!
+
+
+
+
+*** 
 <lichenge0223@gmail.com>
