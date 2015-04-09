@@ -1,0 +1,74 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 24 21:25:04 2015
+
+@author: Dawnknight
+"""
+from bs4 import BeautifulSoup
+import urllib2
+import sys,csv,re,pdb
+import numpy as np
+url = 'http://www.baseball-reference.com/boxes/BOS/BOS201310300.shtml/'
+req = urllib2.Request(url)
+res = urllib2.urlopen(req)
+body = res.read()
+soup = BeautifulSoup(body)
+box = soup.find('table',id = 'play_by_play').find('tbody').findAll('tr')
+innstart = {}
+innsidx  = []
+innend   = {}
+inneidx  = []
+sub      = {}
+subidx   = []
+
+Hrec = {}  # home team record  
+Arec = {}  # away team record
+rec  = {}  # mix record
+
+inn  = 1
+half = 0
+
+for i in range(len(box)):
+    print('searching .... {0}%')
+    tag = box[i]
+
+    # inning start tag
+    try:
+        tag.find('span',{'class':'half_inning_start'}).text.encode('ascii','ignore')
+        innsidx.append(i)
+        half = 1
+        continue 
+    except:
+        pass
+
+    # inning end tag   
+    try:
+        tag.find('span',{'class':'half_inning_summary'}).text.encode('ascii','ignore')
+        inneidx.append(i)
+        inn += 1
+        half = 1
+        continue
+    except:
+        pass
+        
+    # in game substitution tag    
+    try:
+        tag.find('span',{'class':'subst'}).text.encode('ascii','ignore')
+        subidx.append(i)
+        continue
+    except:
+        pass
+        
+
+    
+        
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    

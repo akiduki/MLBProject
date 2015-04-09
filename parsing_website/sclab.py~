@@ -1,0 +1,33 @@
+from scipy.io import loadmat
+import pickle
+
+sc = loadmat('./mat/scene_label')['mtx']
+record = pickle.load(open('./mat/record.pkl','rb'))
+
+rec  = record['All record']
+Arec = record['Away record']
+Hrec = record['Home record']
+
+Alineup = record['Away lineup']
+Hlineup = record['Home lineup']
+Apic = record['Away pitcher']
+Hpic = record['Home pitcher']
+
+Ahrec = record['Away hitter']
+Hhrec = record['Home hitter']
+Aprec = record['Away pictcher']
+Hprec = record['Home pictcher']
+Asub = record['Away substitution']
+Hsub = record['Home substitution']
+
+abrrev = record['Name abbreviation']
+
+
+
+
+
+s,_ = sc.shape
+
+for i in range(s):
+    if sc[1,1] !=0:
+        
