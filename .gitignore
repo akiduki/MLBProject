@@ -13,3 +13,4 @@ scene_detect-clustering/tmp.m
 scene_detect-clustering/tempMAT.mat
 *.y4m
 *.png
+*.ass
